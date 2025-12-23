@@ -1,0 +1,5 @@
+1. d:
+
+2. cd "D:\AI Based Garage Recommendation & Repair Time Estimation with Chatbot in Sri Lanka\ml_repairtime"
+
+3. jupyter notebook
