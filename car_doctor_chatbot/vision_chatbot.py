@@ -10,12 +10,12 @@ import json
 # CONFIGURATION
 # ============================================
 
-GEMINI_API_KEY = "YOUR_API_KEY_HERE"  # ← PUT YOUR KEY HERE
+GEMINI_API_KEY = "AIzaSyC_ivC6pXf1Hamzgc6OvF-VxHgbEXqQjqE"  # ← PUT YOUR KEY HERE
 genai.configure(api_key=GEMINI_API_KEY)
 
-vision_model = genai.GenerativeModel('gemini-1.5-flash')
+vision_model = genai.GenerativeModel('gemini-flash-latest')
 
-# ============================================
+#s ============================================
 # FINAL CHATBOT CLASS
 # ============================================
 
