@@ -303,4 +303,4 @@ if __name__ == "__main__":
     print(f"   Engine (Major): {get_fault_types('Engine', 'Major')[:3]}")
     print(f"   Brake (Minor): {get_fault_types('Brake', 'Minor')}")
     
-    print("\n✅ Knowledge base working correctly!")s
+    print("\n✅ Knowledge base working correctly!")
