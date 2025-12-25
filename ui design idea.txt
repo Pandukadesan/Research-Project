@@ -1,0 +1,216 @@
+🔐 Role-Based System
+
+Driver
+
+Garage
+
+Mechanic
+
+Admin (optional / hidden)
+
+The role decides what screens & actions are visible.
+
+📱 ONE APP → DIFFERENT EXPERIENCES
+At login time:
+
+User selects or is assigned a role.
+
+Login
+ ↓
+Role Check
+ ↓
+Load Role-Based Navigation
+
+1️⃣ DRIVER EXPERIENCE (NORMAL USER)
+
+Sees:
+
+AI chatbot
+
+Fault diagnosis
+
+Drivable / Not drivable
+
+Garage suggestions
+
+Request roadside help
+
+Track repair
+
+Payment
+
+Ratings
+
+Cannot see:
+
+Other jobs
+
+Mechanic tools
+
+Admin panels
+
+2️⃣ GARAGE EXPERIENCE (BUSINESS USER)
+
+Sees:
+
+Incoming bookings
+
+Job list
+
+Repair status update
+
+Assigned mechanics
+
+History & earnings
+
+Cannot see:
+
+AI chatbot for diagnosis
+
+Other garages
+
+Admin controls
+
+3️⃣ MECHANIC EXPERIENCE (FIELD USER)
+
+Sees:
+
+Available jobs
+
+Accept / reject
+
+Navigation
+
+Job status update
+
+Upload photos / notes
+
+Cannot see:
+
+Garage earnings
+
+AI chatbot
+
+Other mechanics
+
+🔑 HOW TECHNICALLy THIS IS DONE (BEGINNER FRIENDLY)
+Step 1: User Table (IMPORTANT)
+
+Every user has:
+
+user_id
+
+name
+
+email
+
+password
+
+role (driver | garage | mechanic | admin)
+
+Step 2: Role-Based Navigation (React Native)
+
+You create separate navigation stacks:
+
+Role	Navigation Stack
+Driver	Chatbot, Booking, Tracking
+Garage	Jobs, Assignments, Reports
+Mechanic	Job Alerts, Map, Status
+
+App loads only one stack based on role.
+
+Step 3: Backend Role Validation (VERY IMPORTANT)
+
+Frontend hides screens
+BUT backend enforces permissions.
+
+Example:
+
+Only garage can update repair status
+
+Only mechanic can accept roadside jobs
+
+This prevents cheating.
+
+🔄 JOB FLOW (SINGLE APP VERSION)
+Driver creates request
+ ↓
+AI diagnoses
+ ↓
+System decides:
+   ├── Garage Job
+   └── Mechanic Job
+ ↓
+Garage / Mechanic sees job
+ ↓
+Status updates
+ ↓
+Completion
+
+
+All inside one app.
+
+🧪 WILL EXAMINERS ACCEPT THIS?
+✅ YES — IF YOU SAY THIS:
+
+“To reduce deployment complexity and ensure rapid prototyping,
+we implemented a single mobile application with role-based access control,
+providing tailored interfaces for drivers, garages, and mechanics.”
+
+This sounds very professional.
+
+🏆 REAL-WORLD EXAMPLES (FOR CONFIDENCE)
+
+Uber → Driver & Rider same app (earlier versions)
+
+Airbnb → Host & Guest same app
+
+Daraz Seller & Buyer → same app initially
+
+⛔ WHEN MULTIPLE APPS ARE NEEDED?
+
+Only when:
+
+Millions of users
+
+Heavy performance needs
+
+Separate teams
+
+❌ NOT your case
+❌ NOT needed for research
+
+🗺️ SIMPLE SCREEN MAP (ONE APP)
+Common Screens
+
+Login
+
+Register
+
+Role selection
+
+Driver Screens
+
+AI Chatbot
+
+Diagnosis Result
+
+Booking
+
+Tracking
+
+Garage Screens
+
+Job List
+
+Job Details
+
+Update Status
+
+Mechanic Screens
+
+Job Alerts
+
+Map
+
+Update Status
