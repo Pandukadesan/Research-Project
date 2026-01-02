@@ -1,0 +1,98 @@
+Create an AI-Based Garage Recommendation System - a unified mobile app with 4 roles (Driver, Garage, Mechanic, Admin).
+
+PROJECT OVERVIEW:
+- Drivers report vehicle issues via AI chatbot → Get garage recommendations OR roadside mechanics
+- Garages receive bookings → Manage jobs → Assign mechanics → Track earnings
+- Independent Mechanics receive Uber-style job requests → Navigate to customer → Complete repairs
+- Admin approves garages/mechanics → Monitors system
+
+TECH STACK:
+- Frontend: React Native + TypeScript
+- Backend: Node.js + Express.js
+- Database: MongoDB with Mongoose
+- Real-time: Socket.io (WebSocket)
+- AI: Gemini Vision API for diagnostics
+- Maps: Google Maps API (or OpenStreetMap/Leaflet as fallback)
+- Auth: JWT + Email OTP (nodemailer)
+
+COMPLETE BACKEND SETUP:
+
+1. PROJECT STRUCTURE:
+/server
+  /models
+    - User.js (role: driver|garage|mechanic|admin, email, password, phone, isApproved, isActive)
+    - Vehicle.js (userId, model, year, mileage, transmission, registration)
+    - Garage.js (userId, name, ownerName, type, businessRegNo, address, lat, lng, operatingHours, documents, availabilityStatus, waitTime, mechanics[])
+    - Mechanic.js (userId, name, nationalId, experience, education, specializations[], serviceRadius, baseLat, baseLng, documents, isOnline)
+    - Booking.js (driverId, garageId, vehicleId, diagnosis{category, type, severity, parts, repairTime, isDrivable}, status: pending|in-progress|completed, assignedMechanic, serviceNotes[], photos[], billAmount, paymentStatus)
+    - MechanicJob.js (driverId, mechanicId, vehicleId, diagnosis, status, serviceNotes[], photos[], cost, paymentStatus)
+    - Rating.js (bookingId, raterId, rateeId, rating, review)
+    - ChatMessage.js (bookingId, senderId, receiverId, message, timestamp)
+  /routes
+    - auth.js (register, login, verify-otp, change-password)
+    - driver.js (profile, vehicles CRUD, get-garages, create-booking, request-mechanic)
+    - garage.js (update-availability, get-bookings, update-booking-status, add-garage-mechanics, earnings)
+    - mechanic.js (toggle-online, get-jobs, accept-job, update-job-status, earnings)
+    - admin.js (get-stats, approve-garage, approve-mechanic, manage-users)
+  /middleware
+    - authMiddleware.js (JWT verification)
+    - roleMiddleware.js (check user role)
+  /services
+    - emailService.js (send OTP via nodemailer)
+    - geminiService.js (Gemini API integration - setup but use hardcoded responses for now)
+    - socketService.js (Socket.io event handlers)
+  - server.js (Express app + Socket.io setup + MongoDB connection)
+
+2. DATABASE MODELS (Key Fields):
+User: email, password, role, phone, otp, otpExpiry, isApproved, isActive
+Vehicle: userId, model (Suzuki Alto 2010-2025), year, mileage, transmission, registration
+Garage: userId, name, type (Local/Authorized), businessRegNo, address, lat, lng, availabilityStatus (open-available|open-busy|closed), waitTime, mechanics[{name, experience, specialization, isAvailable}], rating
+Booking: driverId, garageId/mechanicId, diagnosis {category, type, severity, parts[], repairTime, isDrivable, symptoms[]}, status, billAmount, paymentStatus
+Rating: rating (1-5), review
+
+3. AUTH FLOW:
+- Register → Send OTP to email → Verify OTP → Set password → Login returns JWT
+- Protected routes use authMiddleware
+- Role-based access with roleMiddleware
+
+4. WEBSOCKET EVENTS:
+Driver: 'booking-status-update', 'mechanic-assigned', 'mechanic-location', 'new-message'
+Garage: 'new-booking-request', 'customer-arrived'
+Mechanic: 'new-job-request', 'job-cancelled'
+Admin: 'new-garage-registration', 'new-mechanic-registration'
+
+5. FRONTEND SETUP:
+/mobile-app (React Native)
+  /src
+    /navigation (React Navigation with role-based stacks)
+    /screens
+      /auth (Login, Register, OTPVerify)
+      /driver (Dashboard, ChatBot, GarageList, MechanicList, BookingDetails)
+      /garage (Dashboard, Jobs, Mechanics, Earnings)
+      /mechanic (Dashboard, JobRequests, ActiveJob, Earnings)
+      /shared (Profile, Chat, Map)
+    /components (Button, Input, Card, Modal, Loading)
+    /context (AuthContext, SocketContext)
+    /services (api.js, socket.js)
+    /utils (validators, helpers)
+
+/admin-portal (React Web)
+  /src
+    /pages (Dashboard, Approvals, Users, Monitoring)
+    /components (StatsCard, Table, Chart, Modal)
+
+6. API ENDPOINTS STRUCTURE:
+POST /api/auth/register
+POST /api/auth/login
+POST /api/auth/verify-otp
+GET /api/driver/profile
+POST /api/driver/vehicles
+GET /api/driver/garages (with ranking algorithm)
+POST /api/driver/bookings
+GET /api/garage/bookings
+PATCH /api/garage/availability
+POST /api/mechanic/jobs/accept
+GET /api/admin/stats
+PATCH /api/admin/approve-garage/:id
+
+Create complete folder structure, all models, auth system, basic API endpoints, Socket.io setup, and React Native navigation with role-based routing.
