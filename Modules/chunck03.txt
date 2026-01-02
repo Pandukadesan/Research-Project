@@ -1,0 +1,144 @@
+Building on existing project, implement COMPLETE GARAGE MODULE:
+
+1. GARAGE REGISTRATION & APPROVAL:
+- Registration Form:
+  * Name, Owner Name, Email, Phone
+  * Type: Radio buttons [Local / Authorized]
+  * Business Registration Number (text input)
+  * Address (textarea)
+  * Operating Hours: Open Time, Close Time (time pickers)
+  * Upload Documents: Business Registration (image/PDF), Location Photo (image)
+- Email OTP verification
+- Submit → Status: "Pending Admin Approval" (show pending screen)
+- After admin approval → Can login and access dashboard
+
+2. GARAGE DASHBOARD:
+Top Section - Availability Controls:
+- Radio buttons: ⭕ Closed  ⭕ Open
+- If Open selected → Show sub-options: ⭕ Available  ⭕ Busy
+- If Busy selected → Input field "Waiting Time (minutes)" [30, 45, 60, 90, 120 minute options]
+
+Overview Cards (4 cards in grid):
+- 🔧 Active Jobs: Count with "View →" link
+- 💰 Today's Earnings: Rs. X,XXX with trend indicator
+- 👨‍🔧 Available Mechanics: X/Y available with "Manage →" link
+- 📋 Pending Bookings: Count with notification badge
+
+Recent Bookings Table:
+Columns: Customer, Vehicle, Issue, Time, Status
+Status badges: Pending (blue), In Progress (orange), Completed (green)
+
+3. JOB MANAGEMENT:
+TABS: Pending | In Progress | Completed
+
+PENDING BOOKINGS:
+Job cards showing:
+- Customer: Name, Phone, [📞 Call] button
+- Vehicle: Suzuki Alto 2018, 45,000 km
+- Diagnosis: 
+  * Fault: Brake System - Brake Pad Wear
+  * Severity: MODERATE badge
+  * Estimated Time: 1.0-1.5 hours
+  * Parts: Brake Pads (Front & Rear)
+- Action Buttons:
+  * [✓ Accept & Assign Mechanic] → Opens mechanic selection modal
+  * [✗ Reject] → Confirmation dialog
+
+Mechanic Selection Modal:
+- List of garage mechanics (from Mechanic Management section)
+- Show: Name, Experience, Specialization, Current Status (Available/Busy)
+- Select mechanic → Assign to job → Auto-move to "In Progress"
+
+IN PROGRESS JOBS:
+Job cards showing:
+- All booking details
+- Assigned Mechanic: Name, photo
+- Progress indicator: Accepted → Working → Quality Check → Completed
+- Add Service Notes: Textarea + [Save Note] button
+- Upload Work Photos: Multiple image upload (before/after photos)
+- [Update Status] dropdown: Move to next stage
+- [Mark as Completed] button → Opens bill entry modal
+
+Bill Entry Modal:
+- Parts Cost: Rs. input
+- Labor Cost: Rs. input
+- Other Charges: Rs. input
+- Total: Auto-calculated
+- [Save & Complete Job] button
+
+COMPLETED JOBS:
+- List of completed jobs with all details
+- Payment Status toggle: [Unpaid / Paid] (garage marks this after customer pays)
+- Customer Rating display (shown after customer rates)
+
+4. MECHANIC MANAGEMENT:
+List of Garage Mechanics:
+Table/Cards showing: Name, Experience, Specialization, Status (Available/Busy), Current Job
+
+Add New Mechanic:
+- Form: Name, Experience (years), Specialization (dropdown: Engine/Brake/Electrical/Transmission/All)
+- [Add Mechanic] button
+- NOTE: These are garage-employed mechanics, not independent mechanics
+
+Mechanic Availability:
+- Toggle button for each mechanic: Available/Busy/On Break
+- Can't assign jobs to unavailable mechanics
+
+Attendance Tracking (Simple):
+- Each mechanic row shows: [Mark Present] button (for current day)
+- View attendance history modal: Calendar view showing present/absent days
+- Monthly attendance summary
+
+5. EARNINGS TRACKING:
+TODAY'S EARNINGS:
+- Total: Rs. X,XXX
+- Completed Jobs: Count
+- Pending Payments: Rs. X,XXX (unpaid jobs)
+
+MONTHLY SUMMARY:
+- Line chart (Recharts) showing daily earnings for current month
+- Total month earnings
+- Average per job
+- Completed jobs count
+
+JOB-WISE BREAKDOWN:
+Table: Date | Customer | Vehicle | Amount | Payment Status | Actions
+Filter by: Date range, Payment status
+Export to CSV option
+
+6. REAL-TIME FEATURES:
+Socket.io Events:
+- Listen for 'new-booking-request' → Show toast notification + sound alert
+- 'customer-arrived' notification
+- Emit 'booking-status-update' when status changes
+- Emit 'service-notes-added' when notes saved
+
+In-App Chat:
+- Chat with customer during active job
+- Message list with timestamps
+- Send text messages
+- Upload photos in chat
+
+7. BACKEND APIs FOR GARAGE:
+GET /api/garage/profile
+PATCH /api/garage/availability (update status & waitTime)
+GET /api/garage/bookings?status=pending|in-progress|completed
+PATCH /api/garage/bookings/:id/accept (assignedMechanic)
+PATCH /api/garage/bookings/:id/status (update status)
+POST /api/garage/bookings/:id/notes (add service notes)
+POST /api/garage/bookings/:id/photos (upload photos)
+PATCH /api/garage/bookings/:id/complete (billAmount)
+PATCH /api/garage/bookings/:id/payment (paymentStatus)
+GET /api/garage/mechanics
+POST /api/garage/mechanics (add mechanic)
+PATCH /api/garage/mechanics/:id (toggle availability, attendance)
+GET /api/garage/earnings?period=today|month&startDate&endDate
+
+DESIGN:
+- Web-based responsive layout (works on mobile too)
+- Sidebar navigation: Dashboard | Jobs | Mechanics | Earnings | Profile
+- Professional business UI
+- Color-coded status badges
+- Data tables with sorting/filtering
+- Modal dialogs for actions
+- Toast notifications for real-time updates
