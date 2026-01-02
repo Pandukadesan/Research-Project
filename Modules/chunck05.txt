@@ -1,0 +1,289 @@
+Building on existing project, implement COMPLETE ADMIN WEB PORTAL:
+
+1. ADMIN LOGIN & SETUP:
+- Separate admin login page (/admin)
+- Admin credentials: Seed one admin user in database on first run
+  * Email: admin@garagefinder.com
+  * Password: Admin@123 (must change on first login)
+- JWT authentication for admin
+- Admin-only protected routes
+
+2. ADMIN DASHBOARD:
+
+Statistics Cards (Top row - 6 cards):
+Card 1: 👥 TOTAL DRIVERS
+- Count: 156
+- Subtitle: "Active users"
+- Trend: +12 this week
+
+Card 2: 🏢 TOTAL GARAGES
+- Count: 45 (32 approved, 13 pending)
+- Click to view pending approvals
+
+Card 3: 🔧 TOTAL MECHANICS
+- Count: 78 (65 approved, 13 pending)
+- Click to view pending approvals
+
+Card 4: 🟢 AVAILABLE NOW
+- Garages: 18 (8 Available, 10 Busy)
+- Mechanics: 42 Online
+
+Card 5: 📋 ACTIVE JOBS TODAY
+- Count: 27
+- Breakdown: 8 Pending, 12 In Progress, 7 Completed
+
+Card 6: 📊 TOTAL BOOKINGS
+- All-time: 2,847
+- This month: 234
+
+CHARTS SECTION:
+Row 1:
+- Line Chart: "Bookings Over Time" (last 30 days)
+- Pie Chart: "Fault Categories Distribution" (Brake 35%, Engine 25%, Electrical 20%, Transmission 15%, Other 5%)
+
+Row 2:
+- Bar Chart: "Daily Active Users" (last 7 days, stacked by role)
+- Doughnut Chart: "Average Ratings Distribution" (5★: 45%, 4★: 35%, 3★: 15%, 2★: 4%, 1★: 1%)
+
+RECENT ACTIVITY FEED:
+Scrollable list showing:
+- "John Doe registered as Driver - 5 min ago"
+- "Quick Fix Auto accepted booking #1234 - 12 min ago"
+- "Mechanic Silva completed job #5678 - 1 hour ago"
+- "New garage registration pending approval - 2 hours ago"
+
+3. GARAGE APPROVAL SYSTEM:
+
+PENDING GARAGES TABLE:
+Columns: Name | Owner | Type | Location | Registration Date | Actions
+Each row has [View Details] button
+
+View Details Modal (full screen):
+Left Side - Information:
+- Garage Name, Owner Name
+- Email, Phone with [Copy] buttons
+- Type: Local/Authorized badge
+- Business Registration Number
+- Full Address
+- Operating Hours
+- Registration Date
+
+Right Side - Documents:
+- Business Registration document (view/download)
+- Location Photo (view/download with zoom)
+
+Bottom Section - Location Map:
+- Google Map showing garage location marker
+
+Action Buttons (Bottom):
+- [✓ Approve Garage] (green) → Confirmation modal
+- [✗ Reject] (red) → Opens rejection reason modal
+
+Approval Process:
+1. Click Approve → Confirmation: "Approve this garage?"
+2. Click Confirm → Send approval email to garage owner
+3. Update garage status to "approved" in database
+4. Garage can now login and access dashboard
+5. Show success toast: "Garage approved successfully"
+
+Rejection Process:
+1. Click Reject → Modal with textarea "Reason for rejection"
+2. Enter reason (required) → Click
+[Send Rejection Email]
+3. Email sent with reason to garage owner
+4. Garage status: "rejected" with reason stored
+5. Show success toast: "Rejection email sent"
+APPROVED GARAGES TABLE:
+Columns: Name | Owner | Location | Rating | Active Jobs | Status | Actions
+Status: Active (green) / Inactive (gray)
+Actions: [View Profile] [Toggle Active Status] [View Jobs]
+
+MECHANIC APPROVAL SYSTEM:
+
+PENDING MECHANICS TABLE:
+Columns: Name | Experience | Specialization | Location | Registration Date | Actions
+View Details Modal:
+Personal Information:
+
+Name, Email, Phone
+National ID Number
+Address
+
+Professional Details:
+
+Experience: 8 years badge
+Education: Technical School badge
+Specializations: Tags (Engine, Brakes, Electrical)
+Service Radius: 15 km badge
+Base Location on map
+
+Documents Section:
+
+National ID Front (image viewer)
+National ID Back (image viewer)
+Certificates (PDF/image viewer, multiple files)
+Profile Photo
+
+Approval Actions:
+
+[✓ Approve Mechanic] → Email notification → Can login
+[✗ Reject with Reason] → Email with reason → Status: rejected
+
+APPROVED MECHANICS TABLE:
+Columns: Name | Experience | Specialization | Rating | Jobs Completed | Status | Actions
+Status: Online (green) / Offline (gray)
+Actions: [View Profile] [View Job History] [Toggle Active Status]
+
+USER MANAGEMENT:
+
+TABS: All Users | Drivers | Garages | Mechanics
+DRIVERS TABLE:
+Columns: Name | Email | Phone | Vehicles | Total Bookings | Join Date | Status | Actions
+Actions:
+
+[View Details] → Modal showing full profile, vehicles, booking history
+Toggle Status: Active/Inactive (if inactive, cannot login)
+[View Bookings] → Redirects to bookings page filtered by this driver
+
+GARAGES TABLE (Approved):
+Columns: Name | Owner | Type | Location | Rating | Total Jobs | Status | Actions
+NOTE: Do NOT show earnings data
+Actions:
+
+[View Profile] → Modal with garage details, mechanics list
+[View Jobs] → Job history
+[Toggle Status] → Active/Inactive
+
+MECHANICS TABLE (Approved):
+Columns: Name | Experience | Specialization | Rating | Jobs Done | Status | Actions
+NOTE: Do NOT show earnings data
+Actions:
+
+[View Profile] → Full details
+[View Job History]
+[Toggle Status]
+
+Search & Filter:
+
+Global search box (search by name, email, phone)
+Filter dropdowns: Status (All/Active/Inactive), Date Range, Role
+Export to CSV button
+
+
+SYSTEM MONITORING:
+
+RECENT BOOKINGS OVERVIEW:
+Table: Booking ID | Driver | Garage/Mechanic | Vehicle | Issue | Status | Date | Amount
+Filters: Status, Date Range, Issue Category
+Real-time updates via WebSocket
+SYSTEM HEALTH METRICS:
+Cards showing:
+
+📡 Server Status: Operational (green)
+🗄️ Database Status: Connected (green)
+🔌 WebSocket Connections: 143 active
+📧 Email Service: Operational
+⏱️ Average Response Time: 234ms
+
+POPULAR FAULT CATEGORIES:
+Bar chart showing most common issues:
+
+Brake System: 342 cases
+Engine Issues: 278 cases
+Electrical Problems: 189 cases
+Transmission: 156 cases
+Cooling System: 134 cases
+
+AVERAGE RATINGS ANALYSIS:
+
+Overall System Rating: 4.3 / 5.0
+Garage Average Rating: 4.2 / 5.0
+Mechanic Average Rating: 4.5 / 5.0
+Rating distribution chart
+
+USER ACTIVITY LOG:
+Recent actions with timestamps:
+
+"Admin approved garage 'Quick Fix Auto' - 10:45 AM"
+"Driver 'John' created booking #4567 - 10:42 AM"
+"Mechanic 'Silva' completed job #1234 - 10:38 AM"
+
+
+NOTIFICATION SYSTEM:
+
+Real-time Notifications (WebSocket):
+
+Bell icon with badge count
+Dropdown showing:
+
+"New garage registration pending" (clickable → opens approval page)
+"New mechanic application received"
+"Booking #1234 completed"
+"User reported issue with booking #5678"
+
+
+
+Email Notifications (Auto-send):
+
+Garage approved → Welcome email with login instructions
+Garage rejected → Rejection reason + re-application info
+Mechanic approved → Welcome email
+Mechanic rejected → Reason + reapplication info
+
+
+BACKEND APIs FOR ADMIN:
+GET /api/admin/stats (all dashboard statistics)
+GET /api/admin/garages?status=pending|approved
+GET /api/admin/garages/:id (full details with documents)
+PATCH /api/admin/garages/:id/approve (send email)
+PATCH /api/admin/garages/:id/reject (send email with reason)
+GET /api/admin/mechanics?status=pending|approved
+PATCH /api/admin/mechanics/:id/approve
+PATCH /api/admin/mechanics/:id/reject
+GET /api/admin/users?role=driver|garage|mechanic
+PATCH /api/admin/users/:id/status (toggle active)
+GET /api/admin/bookings (all bookings with filters)
+GET /api/admin/analytics/fault-categories
+GET /api/admin/analytics/ratings
+GET /api/admin/activity-log
+DESIGN & UX:
+
+Layout:
+
+Dark left sidebar with navigation:
+
+Dashboard
+Approvals (Garages, Mechanics) - with badge counts
+Users Management
+System Monitoring
+Settings
+Logout
+
+
+Top bar: Admin name, notification bell, profile dropdown
+
+Components:
+
+DataTables with: Sorting, Pagination, Search
+Charts: Recharts library (Line, Bar, Pie, Doughnut)
+Modals: Full-screen for detailed views
+Toast notifications for actions
+Loading states with skeletons
+Confirmation dialogs for critical actions
+
+Responsive:
+
+Desktop-first but mobile-compatible
+Sidebar collapses on mobile
+Tables scroll horizontally on small screens
+Touch-friendly for tablet use
+
+Professional Admin Theme:
+
+Color scheme: Dark sidebar (#1e293b), White content area, Blue accents (#3b82f6)
+Typography: Clean, readable fonts
+Icons: Lucide React icons
+Shadows and depth
+Smooth transitions
+
+Make it production-ready with comprehensive error handling, loading states, success/error feedback, and secure authentication.
