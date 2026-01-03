@@ -1,0 +1,17 @@
+Garage Recommendation 
+
+Driver in the SLIIT, New Kandy Road Malabe Exact Location : 6.914833, 79.972861
+
+Garage 01 : Location  6.917808, 79.972542 |  Busy (waiting time = 15min) | Distance : 500m    
+            | User     ratings : 3.2/5 |2 Mechanics with 7yrs, 9yrs experience | Arrival Time : 2 min
+
+Garage 02 : Location  6.915941, 79.969006 | Available (waiting time = 0min) |Distance : 550m
+            | User ratings : 4.2/5 |  3 Mechanics with 7yrs, 12 yrs, 3yrs experience | Arrival Time : 2 min
+
+Garage 03 : Location  6.915764, 79.969251 | Busy (waiting time = 15min) |Distance : 600m
+            | User ratings : 4.4/5 | 5 Mechanics with 12yrs, 14 yrs, 10 yrs, 8yrs, 6yrs experience | Arrival Time : 3 min 
+Garage 04 : Location  6.916514, 79.973312 | Busy (waiting time = 0min) | Distance : 600m
+            | User ratings : 4/5 | 3 Mechanics with 4yrs, 6 yrs, 6 yrs Experience | Arrival Time : 3 min 
+
+Garage 05 : Location  6.910179, 79.968944 | Available (waiting time = 15min)| Distance : 1.7 km
+            | User ratings : 3.5/5 | 4 Mechanics with 2 yrs, 2 yrs, 4 yrs, 6 yrs Experience| Arrival Time : 6 min 
