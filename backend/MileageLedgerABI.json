@@ -1,0 +1,23 @@
+[
+  {
+    "inputs": [
+      { "internalType": "string", "name": "_engineNumber", "type": "string" },
+      { "internalType": "string", "name": "_chassisNumber", "type": "string" },
+      { "internalType": "string", "name": "_serviceNumber", "type": "string" },
+      { "internalType": "uint256", "name": "_mileage", "type": "uint256" }
+    ],
+    "name": "storeMileage",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getRecordCount",
+    "outputs": [
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
