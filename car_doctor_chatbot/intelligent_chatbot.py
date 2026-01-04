@@ -1,4 +1,4 @@
-# intelligent_chatbot.py - TRULY INTELLIGENT AI CHATBOT WITH GEMINI
+# enhanced_intelligent_chatbot.py - USER-FRIENDLY AI CHATBOT WITH STRUCTURED FLOW
 
 from accurate_knowledge_base import (
     SUZUKI_ALTO_FAULTS,
@@ -13,17 +13,144 @@ import time
 import re
 
 # CONFIGURATION
-GEMINI_API_KEY = "AIzaSyC_ivC6pXf1Hamzgc6OvF-VxHgbEXqQjqE"
+GEMINI_API_KEY = "AIzaSyB1lr8oWPxbcOywiptJD0qLpPb3kj2L0_s"
 genai.configure(api_key=GEMINI_API_KEY)
-chat_model = genai.GenerativeModel('gemini-1.5-flash-latest')
-vision_model = genai.GenerativeModel('gemini-1.5-flash-latest')
+
+try:
+    chat_model = genai.GenerativeModel('gemini-1.5-flash')
+    vision_model = genai.GenerativeModel('gemini-1.5-flash')
+except:
+    chat_model = genai.GenerativeModel('gemini-pro')
+    vision_model = genai.GenerativeModel('gemini-pro-vision')
 
 # ============================================
-# INTELLIGENT CHATBOT WITH GEMINI AI
+# PREDEFINED SCENARIO PATTERNS
 # ============================================
 
-class IntelligentChatbot:
-    """AI-Powered chatbot that understands natural language"""
+PREDEFINED_SCENARIOS = {
+    "brake_grinding": {
+        "triggers": [
+            "brakes are making grinding",
+            "brake grinding",
+            "grinding noise brake",
+            "grinding when brake",
+            "grinding sound brake"
+        ],
+        "category": "Brake",
+        "severity": "urgent",
+        "questions": [
+            {
+                "text": "Have you parked the car now? Are you safe?",
+                "key": "safety_status",
+                "buttons": ["Yes, I'm safe", "No, still driving"]
+            },
+            {
+                "text": "Are you inside or outside the vehicle right now?",
+                "key": "location_status",
+                "buttons": ["Inside", "Outside"]
+            },
+            {
+                "text": "How fast were you driving when the noise occurred?",
+                "key": "speed_when_occurred",
+                "buttons": ["Low speed", "Moderate speed", "High speed"]
+            },
+            {
+                "text": "Is the brake warning light illuminated on your dashboard?",
+                "key": "brake_warning_light",
+                "buttons": ["Yes", "No"]
+            },
+            {
+                "text": "How does the brake pedal feel when you press it?",
+                "key": "pedal_feel",
+                "buttons": ["Normal", "Soft/Spongy", "Hard to press", "Goes to floor"]
+            },
+            {
+                "text": "When do you hear the grinding noise?",
+                "key": "noise_timing",
+                "buttons": ["Every time I brake", "Only at high speeds", "Only when stopping completely", "Only in the morning"]
+            },
+            {
+                "text": "Is the vehicle still running normally? Can you drive it safely at low speeds?",
+                "key": "vehicle_operational",
+                "buttons": ["Yes, runs fine", "No, something's wrong"]
+            }
+        ],
+        "symptoms_mapping": {
+            "grinding_noise": True,
+            "vehicle_operational": True,
+            "pedal_normal": True
+        }
+    },
+    
+    "engine_overheating": {
+        "triggers": [
+            "car is overheating",
+            "engine overheating",
+            "overheating and stopped",
+            "car stopped overheating",
+            "overheated and stopped"
+        ],
+        "category": "Engine",
+        "severity": "critical",
+        "questions": [
+            {
+                "text": "🚨 Have you parked the car now? Are you safe?",
+                "key": "safety_status",
+                "buttons": ["Yes, I'm safe", "No, still moving"],
+                "style": "urgent"
+            },
+            {
+                "text": "Are you inside or outside the vehicle right now?",
+                "key": "location_status",
+                "buttons": ["Inside", "Outside"]
+            },
+            {
+                "text": "Is there steam or white smoke coming from the bonnet?",
+                "key": "steam_visible",
+                "buttons": ["Yes, I see steam", "No steam visible"]
+            },
+            {
+                "text": "How fast were you driving when this happened?",
+                "key": "speed_before_failure",
+                "input_type": "text",
+                "placeholder": "e.g., About 60 km/h on the highway"
+            },
+            {
+                "text": "Did the engine completely stop, or is it still running?",
+                "key": "engine_status",
+                "buttons": ["Completely stopped", "Still running but rough"]
+            },
+            {
+                "text": "Can you see any fluid leaking under the car? Please check safely from outside the vehicle.",
+                "key": "fluid_leak",
+                "buttons": ["Yes, I see coolant (green/yellow liquid)", "Yes, I see oil (dark liquid)", "No visible leaks", "I can't check safely"]
+            },
+            {
+                "text": "Before the engine stopped, did you hear any unusual noises?",
+                "key": "unusual_sounds",
+                "buttons": ["Knocking/banging sounds", "Hissing sound", "No unusual sounds", "Not sure"]
+            },
+            {
+                "text": "How is your current location? Are you in a safe place?",
+                "key": "location_safety",
+                "buttons": ["On main road - safe shoulder", "Highway - safe emergency lane", "Side road - safe area", "Unsafe location - need help urgently"]
+            }
+        ],
+        "symptoms_mapping": {
+            "engine_stopped": True,
+            "steam": True,
+            "temp_warning_on": True,
+            "coolant_leak_large": True
+        }
+    }
+}
+
+# ============================================
+# ENHANCED CHATBOT CLASS
+# ============================================
+
+class EnhancedChatbot:
+    """User-friendly chatbot with structured flow and button options"""
     
     def __init__(self):
         self.user_name = None
@@ -33,345 +160,214 @@ class IntelligentChatbot:
             "mileage": 45000,
             "transmission": "Manual"
         }
+        self.detected_scenario = None
         self.detected_category = None
+        self.current_question_index = 0
+        self.answers = {}
         self.symptoms = {}
         self.conversation_history = []
-        self.diagnosis_complete = False
         self.dashboard_image_data = None
         self.dashboard_analysis = None
         self.user_location = None
-        self.safety_confirmed = False
-        self.questions_asked = []
-        self.critical_info_needed = []
+        self.awaiting_image = False
         
     def start_conversation(self, user_name: str = "Kavindu"):
         """Start conversation"""
         self.user_name = user_name
-        greeting = f"Hi {user_name}! 👋 I'm here to help with your Suzuki Alto.\nWhat seems to be the problem today?"
+        greeting = f"Hi {user_name}! 👋 I'm here to help with your Suzuki Alto.\n\nWhat seems to be the problem today?"
         
         self.conversation_history.append({"role": "assistant", "content": greeting})
-        return {"message": greeting, "stage": "initial"}
+        return {
+            "message": greeting,
+            "stage": "initial",
+            "show_typing_indicator": False
+        }
     
     def process_message(self, user_message: str, image_data=None) -> dict:
-        """Process user message with AI intelligence"""
+        """Process user message with structured flow"""
         self.conversation_history.append({"role": "user", "content": user_message})
         
         # Handle image upload
-        if image_data:
+        if image_data or self.awaiting_image:
             return self._process_dashboard_image(image_data)
         
-        # Use AI to extract ALL information from message
-        extraction = self._ai_extract_information(user_message)
+        # First message - detect scenario
+        if not self.detected_scenario:
+            return self._detect_and_start_scenario(user_message)
         
-        print(f"🤖 AI Extracted: {extraction}")
-        
-        # Update state with extracted info
-        if extraction.get("category"):
-            self.detected_category = extraction["category"]
-        
-        if extraction.get("symptoms"):
-            self.symptoms.update(extraction["symptoms"])
-        
-        if extraction.get("location"):
-            self.user_location = extraction["location"]
-        
-        if extraction.get("safety_status"):
-            self.safety_confirmed = extraction["safety_status"] == "safe"
-        
-        # Determine urgency
-        is_urgent = extraction.get("urgency") == "critical"
-        
-        # Check if need safety questions
-        if is_urgent and not self.safety_confirmed:
-            return self._ask_safety_questions()
-        
-        # Check if enough info to diagnose
-        if self._can_diagnose_intelligently():
-            # Check if need dashboard image
-            if self._should_request_dashboard_image():
-                return self._request_dashboard_image()
-            
-            return self._create_comprehensive_diagnosis()
-        
-        # Ask intelligent follow-up question
-        return self._ask_intelligent_question()
+        # Process answer to current question
+        return self._process_answer(user_message)
     
-    def _ai_extract_information(self, user_message: str) -> dict:
-        """Use Gemini to extract ALL information from user message"""
+    def _detect_and_start_scenario(self, user_message: str) -> dict:
+        """Detect if message matches predefined scenario"""
+        user_message_lower = user_message.lower()
         
-        prompt = f"""You are a vehicle diagnostic AI assistant. Analyze this message from a Suzuki Alto owner:
-
-Message: "{user_message}"
-
-Extract and return a JSON object with:
-1. category: One of [Engine, Brake, Electrical, Transmission, Suspension, AC, null]
-2. symptoms: Dict of detected symptoms (use snake_case keys)
-3. urgency: "critical", "urgent", or "normal"
-4. location: Any location mentioned (or null)
-5. safety_status: "safe" if user is parked/safe, "unsafe" if in danger, "unknown"
-
-Symptom keys to use:
-ENGINE: engine_stopped, steam, temp_warning_on, coolant_leak_large, coolant_leak_small, hissing_sound, knocking_sound, check_engine_light, shaking, engine_running, no_steam, temp_high, temp_normal
-BRAKE: grinding_noise, squealing_light, soft_pedal, hard_pedal, pedal_normal, pedal_to_floor, brake_warning_light, no_brake_warning, noise_constant, noise_high_speed, vehicle_operational
-ELECTRICAL: no_crank, no_lights, lights_dim, battery_light_on, engine_cranks, lights_on
-TRANSMISSION: difficult_shifting, engine_revs_no_movement, slipping_uphill, no_gear_engagement
-SUSPENSION: steering_vibration, clunking_bumps
-AC: ac_not_blowing, blows_warm, blows_cold, cooling_weak
-
-Examples:
-Input: "My car is overheating and stopped running near Malabe"
-Output: {{"category": "Engine", "symptoms": {{"engine_stopped": true, "temp_high": true}}, "urgency": "critical", "location": "Malabe", "safety_status": "unknown"}}
-
-Input: "I hear grinding when I brake but the car still drives fine"
-Output: {{"category": "Brake", "symptoms": {{"grinding_noise": true, "vehicle_operational": true}}, "urgency": "urgent", "location": null, "safety_status": "safe"}}
-
-Input: "Yeah I'm parked safely outside, there's steam coming out and it smells like coolant"
-Output: {{"category": "Engine", "symptoms": {{"steam": true, "coolant_leak_large": true}}, "urgency": "critical", "location": null, "safety_status": "safe"}}
-
-Now analyze the user's message and return ONLY valid JSON:"""
-
-        try:
-            response = chat_model.generate_content(prompt)
-            response_text = response.text.strip()
-            
-            # Clean response (remove markdown if present)
-            response_text = re.sub(r'```json\n?', '', response_text)
-            response_text = re.sub(r'```\n?', '', response_text)
-            response_text = response_text.strip()
-            
-            extraction = json.loads(response_text)
-            return extraction
-            
-        except Exception as e:
-            print(f"❌ AI extraction error: {e}")
-            # Fallback to keyword matching
-            return self._fallback_extraction(user_message)
+        # Check each predefined scenario
+        for scenario_name, scenario_data in PREDEFINED_SCENARIOS.items():
+            for trigger in scenario_data["triggers"]:
+                if trigger in user_message_lower:
+                    self.detected_scenario = scenario_name
+                    self.detected_category = scenario_data["category"]
+                    
+                    # Extract location if mentioned
+                    location_match = re.search(r'near\s+(\w+)', user_message_lower)
+                    if location_match:
+                        self.user_location = location_match.group(1).title()
+                    
+                    # Start first question
+                    return self._ask_next_question()
+        
+        # No predefined scenario matched - use AI extraction
+        return self._handle_general_query(user_message)
     
-    def _fallback_extraction(self, message: str) -> dict:
-        """Fallback keyword-based extraction if AI fails"""
-        message_lower = message.lower()
+    def _ask_next_question(self) -> dict:
+        """Ask the next question in the scenario"""
+        scenario_data = PREDEFINED_SCENARIOS[self.detected_scenario]
+        questions = scenario_data["questions"]
         
-        extraction = {
-            "category": None,
-            "symptoms": {},
-            "urgency": "normal",
-            "location": None,
-            "safety_status": "unknown"
+        if self.current_question_index >= len(questions):
+            # All questions answered - request dashboard image
+            return self._request_dashboard_image()
+        
+        question = questions[self.current_question_index]
+        
+        # Add acknowledgment before question (except first one)
+        prefix = ""
+        if self.current_question_index > 0:
+            acks = ["Got it 👍", "Understood.", "Okay, thanks.", "Alright.", "I see."]
+            import random
+            prefix = random.choice(acks) + "\n\n"
+        
+        # Format message
+        if self.detected_scenario == "engine_overheating" and self.current_question_index == 0:
+            message = f"⚠️ I understand this is urgent. Your car has overheated and stopped.\nLet me ask critical safety questions first.\n\n🚨 SAFETY CHECK:\n\n{question['text']}"
+        elif self.detected_scenario == "brake_grinding" and self.current_question_index == 0:
+            message = f"I understand you're hearing grinding noises from the brakes.\nLet's go through a few questions to diagnose this properly.\n\n{question['text']}"
+        else:
+            message = prefix + question['text']
+        
+        response = {
+            "message": message,
+            "stage": "questioning",
+            "question_key": question["key"],
+            "question_index": self.current_question_index,
+            "show_typing_indicator": False
         }
         
-        # Detect category
-        for category, data in SUZUKI_ALTO_FAULTS.items():
-            for keyword in data["keywords"]:
-                if keyword in message_lower:
-                    extraction["category"] = category
+        # Add buttons or input type
+        if question.get("input_type") == "text":
+            response["input_type"] = "text"
+            response["placeholder"] = question.get("placeholder", "Type your answer...")
+        elif "buttons" in question:
+            response["buttons"] = question["buttons"]
+        
+        # Add urgent style for critical scenarios
+        if question.get("style") == "urgent":
+            response["style"] = "urgent"
+        
+        return response
+    
+    def _process_answer(self, answer: str) -> dict:
+        """Process user's answer and move to next question"""
+        scenario_data = PREDEFINED_SCENARIOS[self.detected_scenario]
+        questions = scenario_data["questions"]
+        
+        if self.current_question_index < len(questions):
+            question = questions[self.current_question_index]
+            
+            # Store answer
+            self.answers[question["key"]] = answer
+            
+            # Update symptoms based on answer
+            self._update_symptoms_from_answer(question["key"], answer)
+            
+            # Move to next question
+            self.current_question_index += 1
+        
+        # Ask next question or request image
+        return self._ask_next_question()
+    
+    def _update_symptoms_from_answer(self, key: str, answer: str):
+        """Update symptoms based on user's answer"""
+        answer_lower = answer.lower()
+        
+        # Map answers to symptoms
+        symptom_mappings = {
+            "brake_warning_light": {
+                "yes": {"brake_warning_light": True},
+                "no": {"no_brake_warning": True}
+            },
+            "pedal_feel": {
+                "normal": {"pedal_normal": True},
+                "soft": {"soft_pedal": True},
+                "hard": {"hard_pedal": True},
+                "floor": {"pedal_to_floor": True}
+            },
+            "noise_timing": {
+                "every time": {"noise_constant": True},
+                "high speeds": {"noise_high_speed": True}
+            },
+            "vehicle_operational": {
+                "yes": {"vehicle_operational": True},
+                "fine": {"vehicle_operational": True}
+            },
+            "steam_visible": {
+                "yes": {"steam": True},
+                "no": {"no_steam": True}
+            },
+            "engine_status": {
+                "stopped": {"engine_stopped": True},
+                "running": {"engine_running": True}
+            },
+            "fluid_leak": {
+                "coolant": {"coolant_leak_large": True},
+                "oil": {"oil_leak": True},
+                "no": {"no_visible_leaks": True}
+            },
+            "unusual_sounds": {
+                "hissing": {"hissing_sound": True},
+                "knocking": {"knocking_sound": True}
+            }
+        }
+        
+        if key in symptom_mappings:
+            for keyword, symptoms in symptom_mappings[key].items():
+                if keyword in answer_lower:
+                    self.symptoms.update(symptoms)
                     break
-        
-        # Detect urgency
-        critical_keywords = ["stopped", "won't start", "overheating", "smoke", "steam", "can't stop", "no brakes"]
-        if any(k in message_lower for k in critical_keywords):
-            extraction["urgency"] = "critical"
-        
-        # Detect safety
-        safe_keywords = ["parked", "safe", "stopped", "outside"]
-        if any(k in message_lower for k in safe_keywords):
-            extraction["safety_status"] = "safe"
-        
-        # Extract basic symptoms
-        if "grinding" in message_lower:
-            extraction["symptoms"]["grinding_noise"] = True
-        if "steam" in message_lower or "smoke" in message_lower:
-            extraction["symptoms"]["steam"] = True
-        if "stopped" in message_lower:
-            extraction["symptoms"]["engine_stopped"] = True
-        if "overheating" in message_lower or "hot" in message_lower:
-            extraction["symptoms"]["temp_high"] = True
-        
-        return extraction
-    
-    def _ask_safety_questions(self) -> dict:
-        """Ask critical safety questions for urgent cases"""
-        
-        if "parked" not in self.questions_asked:
-            self.questions_asked.append("parked")
-            message = "🚨 I understand this is urgent. First, let me check:\n\n**Have you parked the car now? Are you safe?**"
-            
-            return {
-                "message": message,
-                "stage": "safety_check",
-                "expected_info": "safety_confirmation",
-                "buttons": ["Yes, I'm safe", "No, I'm still moving", "I'm stuck"]
-            }
-        
-        if "location_check" not in self.questions_asked:
-            self.questions_asked.append("location_check")
-            message = "Good. **Are you inside or outside the vehicle right now?**"
-            
-            return {
-                "message": message,
-                "stage": "safety_check",
-                "expected_info": "user_position",
-                "buttons": ["Inside", "Outside"]
-            }
-        
-        # Safety confirmed, continue to diagnosis
-        self.safety_confirmed = True
-        return self._ask_intelligent_question()
-    
-    def _ask_intelligent_question(self) -> dict:
-        """Ask intelligent follow-up question based on context"""
-        
-        # Build context for AI
-        context = {
-            "category": self.detected_category,
-            "symptoms_known": list(self.symptoms.keys()),
-            "questions_asked": self.questions_asked
-        }
-        
-        prompt = f"""You are helping diagnose a Suzuki Alto vehicle issue.
-
-Current diagnosis state:
-- Category detected: {context['category']}
-- Symptoms confirmed: {context['symptoms_known']}
-- Questions already asked: {context['questions_asked']}
-
-Based on this, what is the MOST IMPORTANT next question to ask to complete the diagnosis?
-
-Rules:
-1. Don't ask about symptoms already confirmed
-2. Ask specific, clear questions
-3. For Engine issues: prioritize temperature, running status, leaks
-4. For Brake issues: prioritize pedal feel, noise timing, warning lights
-5. For Electrical: prioritize cranking, lights, battery age
-6. Keep questions short and conversational
-
-Return JSON:
-{{
-  "question": "Your question here",
-  "symptom_target": "symptom_key_this_reveals",
-  "buttons": ["Option 1", "Option 2", "Option 3"]
-}}
-
-Examples:
-{{"question": "Is the engine still running right now?", "symptom_target": "engine_running", "buttons": ["Yes, running fine", "Yes, but rough", "No, completely stopped"]}}
-{{"question": "How does the brake pedal feel?", "symptom_target": "pedal_feel", "buttons": ["Normal", "Soft/Spongy", "Hard to press", "Goes to floor"]}}"""
-
-        try:
-            response = chat_model.generate_content(prompt)
-            response_text = response.text.strip()
-            
-            # Clean response
-            response_text = re.sub(r'```json\n?', '', response_text)
-            response_text = re.sub(r'```\n?', '', response_text)
-            
-            question_data = json.loads(response_text)
-            
-            # Add acknowledgment
-            ack = ""
-            if len(self.questions_asked) > 0:
-                acks = ["Got it 👍", "Understood.", "Okay, thanks.", "Alright.", "I see."]
-                import random
-                ack = random.choice(acks) + "\n\n"
-            
-            self.questions_asked.append(question_data.get("symptom_target", "unknown"))
-            
-            return {
-                "message": ack + question_data["question"],
-                "stage": "questioning",
-                "expected_info": question_data.get("symptom_target"),
-                "buttons": question_data.get("buttons", [])
-            }
-            
-        except Exception as e:
-            print(f"❌ AI question generation error: {e}")
-            return self._fallback_question()
-    
-    def _fallback_question(self) -> dict:
-        """Fallback question if AI fails"""
-        
-        if not self.detected_category:
-            return {
-                "message": "Could you describe the main issue in more detail?",
-                "stage": "clarification"
-            }
-        
-        # Ask category-specific questions
-        if self.detected_category == "Engine":
-            if "engine_running" not in self.symptoms:
-                return {
-                    "message": "Is the engine still running right now?",
-                    "stage": "questioning",
-                    "buttons": ["Yes", "No"]
-                }
-        
-        if self.detected_category == "Brake":
-            if "pedal_feel" not in self.symptoms:
-                return {
-                    "message": "How does the brake pedal feel?",
-                    "stage": "questioning",
-                    "buttons": ["Normal", "Soft", "Hard"]
-                }
-        
-        return {
-            "message": "Can you tell me anything else you've noticed?",
-            "stage": "questioning"
-        }
-    
-    def _can_diagnose_intelligently(self) -> bool:
-        """Check if enough information collected using AI"""
-        
-        if not self.detected_category:
-            return False
-        
-        # Critical combinations allow immediate diagnosis
-        critical_combos = [
-            {"engine_stopped", "steam", "coolant_leak_large"},
-            {"soft_pedal", "pedal_to_floor"},
-            {"no_crank", "no_lights"},
-            {"engine_revs_no_movement"}
-        ]
-        
-        symptoms_set = set(self.symptoms.keys())
-        for combo in critical_combos:
-            if combo.issubset(symptoms_set):
-                return True
-        
-        # Need minimum symptoms based on category
-        min_symptoms = {
-            "Engine": 3,
-            "Brake": 3,
-            "Electrical": 2,
-            "Transmission": 2,
-            "Suspension": 2,
-            "AC": 2
-        }
-        
-        required = min_symptoms.get(self.detected_category, 3)
-        return len(self.symptoms) >= required
-    
-    def _should_request_dashboard_image(self) -> bool:
-        """Check if should ask for dashboard image"""
-        return (
-            not self.dashboard_image_data and
-            self.detected_category in ["Engine", "Brake", "Electrical"] and
-            len(self.symptoms) >= 2
-        )
     
     def _request_dashboard_image(self) -> dict:
         """Request dashboard photo"""
-        message = "Perfect! Let's also take a look at your dashboard.\n\n📸 **Please upload a clear photo of your dashboard with the ignition ON.**"
+        self.awaiting_image = True
+        
+        if self.detected_scenario == "engine_overheating":
+            message = "Thank you. Now please upload a photo of your dashboard so I can see the warning lights.\n\n📸 Please upload a clear photo of your dashboard with the ignition ON."
+        else:
+            message = "Perfect! Let's also take a look at your dashboard.\n\n📸 Please upload a clear photo of your dashboard with the ignition ON."
         
         return {
             "message": message,
             "stage": "requesting_image",
-            "action": "upload_image"
+            "action": "upload_image",
+            "show_typing_indicator": False
         }
     
     def _process_dashboard_image(self, image_data) -> dict:
         """Analyze dashboard image using Gemini Vision"""
+        if not image_data:
+            return {
+                "message": "Please upload the dashboard image to continue.",
+                "stage": "requesting_image",
+                "action": "upload_image"
+            }
+        
         self.dashboard_image_data = image_data
+        self.awaiting_image = False
         
         try:
-            time.sleep(1)  # Simulate processing
+            # Show processing message
+            print("📊 Analyzing dashboard image...")
+            time.sleep(1)
             
             prompt = """Analyze this vehicle dashboard image and provide a JSON response:
 
@@ -403,47 +399,75 @@ Be specific and accurate. Only mention lights that are clearly illuminated."""
             self.dashboard_analysis = json.loads(analysis_text)
             
             # Update symptoms from dashboard
-            if "temperature" in str(self.dashboard_analysis.get("warning_lights", [])).lower():
+            warning_lights_str = str(self.dashboard_analysis.get("warning_lights", [])).lower()
+            if "temperature" in warning_lights_str or "temp" in warning_lights_str:
                 self.symptoms["temp_warning_on"] = True
-            if "brake" in str(self.dashboard_analysis.get("warning_lights", [])).lower():
+            if "brake" in warning_lights_str:
                 self.symptoms["brake_warning_light"] = True
-            if "engine" in str(self.dashboard_analysis.get("warning_lights", [])).lower():
+            if "engine" in warning_lights_str or "check engine" in warning_lights_str:
                 self.symptoms["check_engine_light"] = True
             
-            # Format result
-            warning_list = self.dashboard_analysis.get("warning_lights", [])
-            if not warning_list:
-                warning_list = ["✓ No warning lights detected"]
-            
-            result_msg = "✓ **Analysis Complete!**\n\n**Dashboard Status:**\n"
-            for warning in warning_list[:5]:
-                result_msg += f"- {warning}\n"
-            result_msg += f"\n**Temperature:** {self.dashboard_analysis.get('temperature_status', 'normal').title()}\n"
-            result_msg += f"**Fuel:** {self.dashboard_analysis.get('fuel_level', 'adequate').title()}\n\n"
-            result_msg += "Now let me create your complete diagnosis..."
+            # Format result based on scenario
+            if self.detected_scenario == "engine_overheating":
+                warning_list = self.dashboard_analysis.get("warning_lights", [])
+                if warning_list:
+                    result_msg = "📊 Analyzing dashboard image...\n\n⚠️ Critical Warnings Detected:\n\n"
+                    for warning in warning_list[:3]:
+                        if "temperature" in warning.lower():
+                            result_msg += "🔴 Temperature Warning Light (RED)\n"
+                        elif "engine" in warning.lower():
+                            result_msg += "🟡 Check Engine Light (YELLOW)\n"
+                        else:
+                            result_msg += f"⚠️ {warning}\n"
+                    result_msg += "\nAnalysis: Engine overheating condition confirmed\n\nContinuing diagnosis..."
+                else:
+                    result_msg = "✓ Dashboard image analyzed.\n\nContinuing diagnosis..."
+            else:
+                warning_list = self.dashboard_analysis.get("warning_lights", [])
+                if not warning_list:
+                    warning_list = ["✓ No warning lights detected"]
+                
+                result_msg = "✓ Analysis Complete!\n\n**Dashboard Status:**\n"
+                for warning in warning_list[:5]:
+                    result_msg += f"- {warning}\n"
+                result_msg += f"\n**Temperature:** {self.dashboard_analysis.get('temperature_status', 'normal').title()}\n"
+                result_msg += f"**Fuel:** {self.dashboard_analysis.get('fuel_level', 'adequate').title()}\n\n"
+                result_msg += "Now let me create your complete diagnosis..."
             
             time.sleep(1)
+            
+            # Add scenario-specific symptoms
+            scenario_data = PREDEFINED_SCENARIOS[self.detected_scenario]
+            self.symptoms.update(scenario_data["symptoms_mapping"])
             
             return {
                 "message": result_msg,
                 "stage": "image_analyzed",
                 "dashboard_analysis": self.dashboard_analysis,
-                "next_action": "create_diagnosis"
+                "next_action": "create_diagnosis",
+                "show_typing_indicator": True,
+                "processing_duration": 2
             }
             
         except Exception as e:
             print(f"❌ Image analysis error: {e}")
+            
+            # Fallback - still create diagnosis
+            scenario_data = PREDEFINED_SCENARIOS[self.detected_scenario]
+            self.symptoms.update(scenario_data["symptoms_mapping"])
+            
             return {
-                "message": "I had trouble analyzing the image. Let me proceed with the diagnosis based on your answers.",
+                "message": "I had trouble analyzing the image, but I have enough information to diagnose the issue.\n\nLet me create your diagnosis...",
                 "stage": "image_analysis_failed",
-                "next_action": "create_diagnosis"
+                "next_action": "create_diagnosis",
+                "show_typing_indicator": True,
+                "processing_duration": 2
             }
     
-    def _create_comprehensive_diagnosis(self) -> dict:
-        """Create comprehensive diagnosis"""
+    def create_diagnosis(self) -> dict:
+        """Create comprehensive diagnosis with progressive display"""
         print("\n🔍 Creating comprehensive diagnosis...")
-        
-        time.sleep(2)  # Simulate AI thinking
+        time.sleep(2)
         
         # Get fault details
         fault_info = get_fault_by_symptoms(self.detected_category, self.symptoms)
@@ -462,8 +486,6 @@ Be specific and accurate. Only mention lights that are clearly illuminated."""
             fault_info, drivability, parts, repair_time
         )
         
-        self.diagnosis_complete = True
-        
         return {
             "message": diagnosis_card,
             "stage": "diagnosis_complete",
@@ -478,8 +500,10 @@ Be specific and accurate. Only mention lights that are clearly illuminated."""
                 "repair_time": repair_time,
                 "safety_instructions": drivability['instructions'],
                 "location": self.user_location,
-                "dashboard_analysis": self.dashboard_analysis
-            }
+                "dashboard_analysis": self.dashboard_analysis,
+                "causes": fault_info.get('causes', [])
+            },
+            "show_typing_indicator": False
         }
     
     def _format_diagnosis_card(self, fault_info, drivability, parts, repair_time) -> str:
@@ -491,124 +515,234 @@ Be specific and accurate. Only mention lights that are clearly illuminated."""
             "Major": "🔴"
         }
         
+        # Header based on severity
+        if fault_info['severity'] == "Major":
+            header = "🚨 CRITICAL DIAGNOSIS RESULT"
+        else:
+            header = "🔍 DIAGNOSIS COMPLETE"
+        
         card = f"""
 ┌{'─'*50}┐
-│  🔍 DIAGNOSIS COMPLETE                            │
+│  {header:<48}│
 ├{'─'*50}┤
-│                                                    │
-│ 🚗 Vehicle Details:                               │
-│  • Model: {self.vehicle_info['model']}            │
-│  • Model Year: {self.vehicle_info['year']}        │
-│  • Mileage: {self.vehicle_info['mileage']:,} km   │
-│  • Transmission: {self.vehicle_info['transmission']}│
-"""
+│                                                  │
+│ 🚗 Vehicle Details:                              │
+│  • Model: {self.vehicle_info['model']:<37}│
+│  • Model Year: {self.vehicle_info['year']:<33}│
+│  • Mileage: {self.vehicle_info['mileage']:,} km{' '*(37-len(f"{self.vehicle_info['mileage']:,} km"))}│
+│  • Transmission: {self.vehicle_info['transmission']:<30}│"""
         
         if self.user_location:
-            card += f"│  • Current Location: {self.user_location}         │\n"
-        
-        card += f"""│                                                    │
-│ ⚠️ Fault Information:                             │
-│  • Category: {self.detected_category.upper()}     │
-│  • Fault Type: {fault_info['fault_name'][:35]}    │
-│  • Severity: {severity_emoji.get(fault_info['severity'], '⚠️')} {fault_info['severity'].upper()}│
-│                                                    │
-│ 📋 Symptoms Detected:                             │"""
-
-        # Add confirmed symptoms
-        symptom_count = 0
-        for symptom_key in list(self.symptoms.keys())[:6]:
-            display_name = symptom_key.replace('_', ' ').title()
-            card += f"\n│  ✓ {display_name[:44]:<44}│"
-            symptom_count += 1
-        
-        if symptom_count == 0:
-            card += f"\n│  ✓ Issue detected and analyzed                    │"
+            card += f"\n│  • Current Location: Near {self.user_location:<22}│"
         
         card += f"""
-│                                                    │
-│ 🚦 Drivability Assessment:                        │
-│  {'🛑 NOT DRIVABLE' if not drivability['is_drivable'] else '✅ DRIVABLE WITH CAUTION'}                           │
-│                                                    │"""
+│                                                  │
+│ ⚠️ Fault Information:                            │
+│  • Fault Category: {self.detected_category.upper():<30}│
+│  • Fault Type: {fault_info['fault_name'][:38]:<38}│
+│  • Severity: {severity_emoji.get(fault_info['severity'], '⚠️')} {fault_info['severity'].upper():<37}│
+│                                                  │
+│ 📋 Symptoms Detected:                            │"""
+
+        # Add confirmed symptoms (max 6)
+        symptoms_to_show = [k for k, v in self.symptoms.items() if v][:6]
+        if not symptoms_to_show:
+            card += f"\n│  ✓ {'Issue detected and analyzed':<44}│"
+        else:
+            for symptom_key in symptoms_to_show:
+                display_name = symptom_key.replace('_', ' ').title()
+                card += f"\n│  ✓ {display_name[:44]:<44}│"
+        
+        card += f"""
+│                                                  │
+│ 🚦 Drivability Assessment:                       │
+│  {'🛑 NOT DRIVABLE' if not drivability['is_drivable'] else '✅ DRIVABLE WITH CAUTION':<48}│"""
+
+        # Add condition if critical
+        if fault_info['severity'] == "Major" and not drivability['is_drivable']:
+            card += f"\n│  • Condition: EMERGENCY{' '*27}│"
+        
+        card += f"""
+│                                                  │"""
 
         # Safety instructions
-        if not drivability['is_drivable']:
+        instruction_header = "⚠️ Immediate Safety Instructions:" if not drivability['is_drivable'] else "✓ Safety Instructions:"
+        card += f"""
+│ {instruction_header:<48}│"""
+        
+        for instruction in drivability['instructions'][:5]:
+            # Wrap long instructions
+            if len(instruction) > 44:
+                card += f"\n│  • {instruction[:42]:<42}│"
+                remaining = instruction[42:]
+                while remaining:
+                    card += f"\n│    {remaining[:44]:<44}│"
+                    remaining = remaining[44:]
+            else:
+                card += f"\n│  • {instruction[:44]:<44}│"
+        
+        # Causes (if Major fault)
+        if fault_info.get('causes') and fault_info['severity'] == "Major":
             card += f"""
-│ ⚠️ Immediate Safety Instructions:                 │"""
-            for instruction in drivability['instructions'][:4]:
-                card += f"\n│  • {instruction[:46]:<46}│"
-        else:
-            card += f"""
-│ ✓ Safety Instructions:                            │"""
-            for instruction in drivability['instructions'][:3]:
-                card += f"\n│  • {instruction[:46]:<46}│"
+│                                                  │
+│ 🔍 Likely Causes:                                │"""
+            for cause in fault_info['causes'][:4]:
+                if len(cause) > 44:
+                    card += f"\n│  • {cause[:42]:<42}│"
+                    card += f"\n│    {cause[42:86]:<44}│"
+                else:
+                    card += f"\n│  • {cause[:44]:<44}│"
         
         # Parts required
         if parts:
             card += f"""
-│                                                    │
-│ 🧩 Parts Required:                                │"""
-            for part in parts[:4]:
-                card += f"\n│  • {part[:46]:<46}│"
+│                                                  │
+│ 🧩 Parts Required:                               │"""
+            for part in parts[:5]:
+                card += f"\n│  • {part[:44]:<44}│"
         
         # Urgency and time
         card += f"""
-│                                                    │
-│ ⏱ Urgency Level: {drivability['urgency'].upper():<29}│
-│                                                    │
-│ ⏰ Estimated Repair Time:                          │
+│                                                  │
+│ ⚡ Urgency Level: {drivability['urgency'].upper():<30}│
+│                                                  │
+│ ⏱ Estimated Repair Time:                         │
 │  {repair_time:<48}│
-│  (Based on ML prediction model)                   │
-│                                                    │"""
+│  (Based on ML prediction model){' '*19}│
+│                                                  │"""
 
         # Action button
         if drivability['is_drivable']:
             card += f"""
-│  [Find Nearby Garages →]                          │"""
+│  [Find Nearby Garages →]                         │"""
         else:
             card += f"""
-│  [Request Roadside Mechanic →]                    │"""
+│  [Request Roadside Mechanic →]                   │"""
         
         card += f"""
-│                                                    │
+│                                                  │
 └{'─'*50}┘
 """
         
         return card
+    
+    def _handle_general_query(self, user_message: str) -> dict:
+        """Handle queries that don't match predefined scenarios"""
+        
+        # Use AI to extract category
+        extraction = self._ai_extract_category(user_message)
+        
+        if extraction.get("category"):
+            self.detected_category = extraction["category"]
+            return {
+                "message": f"I understand you're experiencing a {self.detected_category.lower()} issue. Let me ask you some questions to diagnose this properly.\n\nHave you parked the car now? Are you safe?",
+                "stage": "questioning",
+                "buttons": ["Yes, I'm safe", "No, still driving"]
+            }
+        
+        return {
+            "message": "Could you describe the issue in more detail? For example:\n- Is it a brake problem?\n- Engine issue?\n- Electrical problem?\n- Something else?",
+            "stage": "clarification"
+        }
+    
+    def _ai_extract_category(self, user_message: str) -> dict:
+        """Extract category using AI"""
+        prompt = f"""Analyze this vehicle issue and return JSON:
+{{"category": "Engine/Brake/Electrical/Transmission/Suspension/AC", "keywords": ["key", "words"]}}
+
+Message: "{user_message}"
+
+Return only valid JSON."""
+
+        try:
+            response = chat_model.generate_content(prompt)
+            response_text = response.text.strip()
+            response_text = re.sub(r'```json\n?', '', response_text)
+            response_text = re.sub(r'```\n?', '', response_text)
+            return json.loads(response_text)
+        except:
+            return {}
+
 
 # ============================================
 # INTERACTIVE TEST
 # ============================================
 
-def run_intelligent_test():
-    """Test intelligent chatbot"""
+if __name__ == "__main__":
     print("="*70)
-    print("🤖 INTELLIGENT AI CHATBOT - NATURAL LANGUAGE TEST")
+    print("🚗 SUZUKI ALTO ENHANCED CHATBOT - User Friendly Version")
+    print("="*70)
+    print("\nTest Case Options:")
+    print("1. Type: 'My brakes are making grinding noises when I press them'")
+    print("2. Type: 'My car is overheating and stopped running near Malabe'")
+    print("3. Or describe your own issue")
     print("="*70)
     
-    bot = IntelligentChatbot()
+    bot = EnhancedChatbot()
+    
+    # Start conversation
     response = bot.start_conversation("Kavindu")
     print(f"\n🤖: {response['message']}")
     
-    # Test with natural language
-    test_messages = [
-        "My brakes are making grinding noises when I press them",
-        "Yeah I'm parked and safe now",
-        "I'm outside the car",
-        "I was going about 50 km/h when I first heard it",
-        "No warning lights on the dashboard",
-        "Pedal feels normal, not soft or anything",
-        "It happens every single time I brake"
-    ]
-    
-    for msg in test_messages:
-        print(f"\n👤: {msg}")
-        result = bot.process_message(msg)
-        print(f"\n🤖: {result['message']}")
-        
-        if result.get('stage') == 'diagnosis_complete':
+    # Main loop
+    while True:
+        try:
+            user_input = input("\n👤: ").strip()
+            
+            if user_input.lower() in ['quit', 'exit', 'q']:
+                print("\n🤖: Drive safely! Goodbye.")
+                break
+            
+            if not user_input:
+                continue
+            
+            # Process message
+            result = bot.process_message(user_input)
+            
+            # Show typing indicator if needed
+            if result.get('show_typing_indicator'):
+                print("\n🤖: [Thinking...]", end='', flush=True)
+                time.sleep(result.get('processing_duration', 1))
+                print("\r" + " "*50 + "\r", end='')
+            
+            # Display response
+            print(f"\n🤖: {result['message']}")
+            
+            # Show buttons if present
+            if result.get('buttons'):
+                print("\nOptions:")
+                for i, button in enumerate(result['buttons'], 1):
+                    print(f"  {i}. {button}")
+            
+            # Handle image upload
+            if result.get('action') == 'upload_image':
+                user_input = input("\n👤: [Type 'upload' to simulate image upload]: ").strip()
+                if user_input.lower() == 'upload':
+                    print("   📤 Uploading image...")
+                    time.sleep(1)
+                    result = bot.process_message("", image_data="simulated_image_data")
+                    print(f"\n🤖: {result['message']}")
+            
+            # Create diagnosis if ready
+            if result.get('next_action') == 'create_diagnosis':
+                time.sleep(2)
+                diagnosis_result = bot.create_diagnosis()
+                print(f"\n{diagnosis_result['message']}")
+                break
+            
+            # End if diagnosis complete
+            if result.get('stage') == 'diagnosis_complete':
+                break
+                
+        except KeyboardInterrupt:
+            print("\n\n🤖: Interrupted. Drive safely!")
             break
-        
-        time.sleep(0.5)
-
-if __name__ == "__main__":
-    run_intelligent_test()
+        except Exception as e:
+            print(f"\n❌ Error: {e}")
+            import traceback
+            traceback.print_exc()
+            break
+    
+    print("\n" + "="*70)
+    print("✅ Session Complete")
+    print("="*70)
