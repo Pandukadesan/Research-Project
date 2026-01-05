@@ -36,15 +36,24 @@ async function getRecordByIndex(index) {
 
 // 🔹 Get all records (used for filtering)
 async function getAllMileageRecords() {
-  const count = await getRecordCount();
+  const count = await contract.getRecordCount(); // number of records
   const records = [];
 
   for (let i = 0; i < count; i++) {
-    records.push(await getRecordByIndex(i));
+    const r = await contract.records(i); // pass index!
+    records.push({
+      engineNumber: r.engineNumber,
+      chassisNumber: r.chassisNumber,
+      serviceNumber: r.serviceNumber,
+      mileage: Number(r.mileage),
+      timestamp: Number(r.timestamp)
+    });
   }
 
   return records;
 }
+
+
 
 // Function to store mileage on blockchain
 async function storeMileage(engineNumber, chassisNumber, serviceNumber, mileage) {

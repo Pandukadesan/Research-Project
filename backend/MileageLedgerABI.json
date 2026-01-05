@@ -19,5 +19,18 @@
     ],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "records",
+    "outputs": [
+      { "internalType": "string", "name": "engineNumber", "type": "string" },
+      { "internalType": "string", "name": "chassisNumber", "type": "string" },
+      { "internalType": "string", "name": "serviceNumber", "type": "string" },
+      { "internalType": "uint256", "name": "mileage", "type": "uint256" },
+      { "internalType": "uint256", "name": "timestamp", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ]

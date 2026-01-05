@@ -16,6 +16,15 @@ export default function UserDashboard() {
       >
         <Text style={styles.buttonText}>Vehicle Score</Text>
       </TouchableOpacity>
+
+      
+      {/* Price Score Button */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/(price predict)")}
+      >
+        <Text style={styles.buttonText}>Vehicle Score</Text>
+      </TouchableOpacity>
     </View>
   );
 }

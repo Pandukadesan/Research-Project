@@ -21,6 +21,7 @@ export default function RootLayout() {
          <Stack.Screen name="(service)/index" options={{ headerShown: false }} />
          <Stack.Screen name="(user dashboard)/index" options={{ headerShown: false }} />
          <Stack.Screen name="(vehicle score)/index" options={{ headerShown: false }} />
+         <Stack.Screen name="(price predict)/index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
