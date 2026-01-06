@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vehicle Repair Time Prediction</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, select { padding: 8px; margin-bottom: 10px; width: 250px; }
+    button { padding: 10px 20px; }
+    #result { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h2>Vehicle Repair Time Estimation</h2>
+
+  <form id="predictForm">
+    <input placeholder="Car Model" name="Car_Model" required><br>
+    <input placeholder="Model Year" name="Model_Year" type="number" required><br>
+    <input placeholder="Mileage KM" name="Mileage_KM" type="number" required><br>
+    <input placeholder="Fault Category" name="Fault_Category" required><br>
+    <input placeholder="Fault Type" name="Fault_Type" required><br>
+    <input placeholder="Severity" name="Severity" required><br>
+    <input placeholder="Parts Required" name="Parts_Required" required><br>
+    <input placeholder="Parts Availability" name="Parts_Availability" required><br>
+    <input placeholder="Garage Type" name="Garage_Type" required><br>
+    <input placeholder="Mechanic Expertise" name="Mechanic_Expertise" type="number" required><br>
+    <input placeholder="Location" name="Location" required><br>
+    <input placeholder="Day of Week" name="Day_of_Week" required><br>
+    <input placeholder="Time of Day" name="Time_of_Day" required><br>
+    <button type="submit">Predict</button>
+  </form>
+
+  <h3 id="result"></h3>
+
+  <script>
+    document.getElementById("predictForm").onsubmit = async (e) => {
+      e.preventDefault();
+
+      const formData = Object.fromEntries(new FormData(e.target));
+
+      // Convert numeric fields
+      formData.Model_Year = Number(formData.Model_Year);
+      formData.Mileage_KM = Number(formData.Mileage_KM);
+      formData.Mechanic_Expertise = Number(formData.Mechanic_Expertise);
+
+      try {
+        const res = await fetch("http://localhost:3000/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData)
+        });
+
+        if (!res.ok) {
+          throw new Error(`Server responded with status ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        if (data.estimated_repair_time !== undefined) {
+          document.getElementById("result").innerText =
+            "Estimated Repair Time: " + data.estimated_repair_time + " hours";
+        } else {
+          document.getElementById("result").innerText =
+            "Prediction failed: check your data or server logs.";
+        }
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("result").innerText =
+          "Error connecting to server: " + err.message;
+      }
+    };
+  </script>
+</body>
+</html>
