@@ -2,35 +2,545 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vehicle Repair Time Prediction</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    input, select { padding: 8px; margin-bottom: 10px; width: 250px; }
-    button { padding: 10px 20px; }
-    #result { margin-top: 20px; font-weight: bold; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px 30px;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: moveGrid 20s linear infinite;
+    }
+
+    @keyframes moveGrid {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header h1 {
+      font-size: 2.2em;
+      margin-bottom: 10px;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .header .subtitle {
+      font-size: 1.1em;
+      opacity: 0.95;
+      font-weight: 300;
+    }
+
+    .robot-icon {
+      font-size: 3em;
+      margin-bottom: 10px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .form-container {
+      padding: 40px 30px;
+    }
+
+    .fixed-field {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .fixed-field .label {
+      font-size: 0.9em;
+      opacity: 0.9;
+      margin-bottom: 5px;
+    }
+
+    .fixed-field .value {
+      font-size: 1.8em;
+      font-weight: 700;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+      animation: fadeIn 0.5s ease-out forwards;
+      opacity: 0;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.15s; }
+    .form-group:nth-child(3) { animation-delay: 0.2s; }
+    .form-group:nth-child(4) { animation-delay: 0.25s; }
+    .form-group:nth-child(5) { animation-delay: 0.3s; }
+    .form-group:nth-child(6) { animation-delay: 0.35s; }
+    .form-group:nth-child(7) { animation-delay: 0.4s; }
+    .form-group:nth-child(8) { animation-delay: 0.45s; }
+    .form-group:nth-child(9) { animation-delay: 0.5s; }
+    .form-group:nth-child(10) { animation-delay: 0.55s; }
+    .form-group:nth-child(11) { animation-delay: 0.6s; }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #333;
+      font-weight: 600;
+      font-size: 0.95em;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"],
+    .form-group select {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1em;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .radio-option {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .radio-option input[type="radio"] {
+      display: none;
+    }
+
+    .radio-option label {
+      display: block;
+      padding: 14px 20px;
+      background: #f5f5f5;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .radio-option input[type="radio"]:checked + label {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+      transform: scale(1.05);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .radio-option label:hover {
+      border-color: #667eea;
+      transform: translateY(-2px);
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .submit-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+    }
+
+    .submit-btn:active {
+      transform: translateY(-1px);
+    }
+
+    .submit-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    #result {
+      margin-top: 30px;
+      padding: 25px;
+      background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+      color: white;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 1.3em;
+      font-weight: 700;
+      display: none;
+      animation: resultPop 0.5s ease-out;
+      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    }
+
+    #result.error {
+      background: linear-gradient(135deg, #f44336 0%, #e53935 100%);
+      box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+    }
+
+    #result.show {
+      display: block;
+    }
+
+    @keyframes resultPop {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .info-badge {
+      display: inline-block;
+      background: #e3f2fd;
+      color: #1976d2;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 {
+        font-size: 1.6em;
+      }
+
+      .form-container {
+        padding: 30px 20px;
+      }
+
+      .radio-group {
+        flex-direction: column;
+      }
+
+      .radio-option {
+        width: 100%;
+      }
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      padding-right: 40px;
+    }
   </style>
 </head>
 <body>
-  <h2>Vehicle Repair Time Estimation</h2>
+  <div class="container">
+    <div class="header">
+      <div class="header-content">
+        <div class="robot-icon">🤖</div>
+        <h1>AI Repair Time Predictor</h1>
+        <p class="subtitle">Intelligent Vehicle Diagnostics System</p>
+      </div>
+    </div>
 
-  <form id="predictForm">
-    <input placeholder="Car Model" name="Car_Model" required><br>
-    <input placeholder="Model Year" name="Model_Year" type="number" required><br>
-    <input placeholder="Mileage KM" name="Mileage_KM" type="number" required><br>
-    <input placeholder="Fault Category" name="Fault_Category" required><br>
-    <input placeholder="Fault Type" name="Fault_Type" required><br>
-    <input placeholder="Severity" name="Severity" required><br>
-    <input placeholder="Parts Required" name="Parts_Required" required><br>
-    <input placeholder="Parts Availability" name="Parts_Availability" required><br>
-    <input placeholder="Garage Type" name="Garage_Type" required><br>
-    <input placeholder="Mechanic Expertise" name="Mechanic_Expertise" type="number" required><br>
-    <input placeholder="Location" name="Location" required><br>
-    <input placeholder="Day of Week" name="Day_of_Week" required><br>
-    <input placeholder="Time of Day" name="Time_of_Day" required><br>
-    <button type="submit">Predict</button>
-  </form>
+    <div class="form-container">
+      <div class="fixed-field">
+        <div class="label">Vehicle Model</div>
+        <div class="value">🚗 Suzuki Alto</div>
+      </div>
 
-  <h3 id="result"></h3>
+      <form id="predictForm">
+        <input type="hidden" name="Car_Model" value="Suzuki Alto">
+
+        <div class="form-group">
+          <label for="modelYear">Model Year</label>
+          <select name="Model_Year" id="modelYear" required>
+            <option value="">Select Year</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+            <option value="2021">2021</option>
+            <option value="2020">2020</option>
+            <option value="2019">2019</option>
+            <option value="2018">2018</option>
+            <option value="2017">2017</option>
+            <option value="2016">2016</option>
+            <option value="2015">2015</option>
+            <option value="2014">2014</option>
+            <option value="2013">2013</option>
+            <option value="2012">2012</option>
+            <option value="2011">2011</option>
+            <option value="2010">2010</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="mileage">Mileage (KM)</label>
+          <input type="number" name="Mileage_KM" id="mileage" placeholder="Enter mileage in kilometers" min="0" step="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="faultCategory">Fault Category</label>
+          <select name="Fault_Category" id="faultCategory" required>
+            <option value="">Select Fault Category</option>
+            <option value="Engine">🔧 Engine</option>
+            <option value="Electrical">⚡ Electrical</option>
+            <option value="Suspension Faults">🔩 Suspension Faults</option>
+            <option value="Breaks Faults">🛑 Breaks Faults</option>
+            <option value="Transmission Faults">⚙️ Transmission Faults</option>
+            <option value="AC Faults">❄️ AC Faults</option>
+            <option value="Body">🚙 Body</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="faultType">Fault Type</label>
+          <input type="text" name="Fault_Type" id="faultType" placeholder="Describe the fault type" required>
+        </div>
+
+        <div class="form-group">
+          <label>Severity Level</label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="Severity" id="minor" value="Minor" required>
+              <label for="minor">Minor</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="Severity" id="moderate" value="Moderate" required>
+              <label for="moderate">Moderate</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="Severity" id="major" value="Major" required>
+              <label for="major">Major</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="partsRequired">Parts Required</label>
+          <input type="text" name="Parts_Required" id="partsRequired" placeholder="List required parts" required>
+        </div>
+
+        <div class="form-group">
+          <label>Parts Availability <span class="info-badge">Default: In Stock</span></label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="Parts_Availability" id="inStock" value="In Stock" checked required>
+              <label for="inStock">In Stock</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="Parts_Availability" id="orderRequired" value="Order Required" required>
+              <label for="orderRequired">Order Required</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Garage Type <span class="info-badge">Default: Local</span></label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="Garage_Type" id="local" value="Local" checked required>
+              <label for="local">Local</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="Garage_Type" id="authorized" value="Authorized" required>
+              <label for="authorized">Authorized</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="mechanicExpertise">Mechanic Expertise (Years) <span class="info-badge">Default: 7</span></label>
+          <input type="number" name="Mechanic_Expertise" id="mechanicExpertise" value="7" min="0" max="50" step="1" required>
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input type="text" name="Location" id="location" placeholder="Enter location" required>
+        </div>
+
+        <div class="form-group">
+          <label for="dayOfWeek">Day of Week</label>
+          <select name="Day_of_Week" id="dayOfWeek" required>
+            <option value="">Select Day</option>
+            <option value="Sunday">Sunday</option>
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Time of Day <span class="info-badge">Default: Evening</span></label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="Time_of_Day" id="morning" value="Morning" required>
+              <label for="morning">Morning</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="Time_of_Day" id="afternoon" value="Afternoon" required>
+              <label for="afternoon">Afternoon</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="Time_of_Day" id="evening" value="Evening" checked required>
+              <label for="evening">Evening</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="Time_of_Day" id="night" value="Night" required>
+              <label for="night">Night</label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <span>🔮 Predict Repair Time</span>
+        </button>
+      </form>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Analyzing vehicle data...</p>
+      </div>
+
+      <div id="result"></div>
+    </div>
+  </div>
 
   <script>
     document.getElementById("predictForm").onsubmit = async (e) => {
@@ -38,10 +548,15 @@
 
       const formData = Object.fromEntries(new FormData(e.target));
 
-      // Convert numeric fields
       formData.Model_Year = Number(formData.Model_Year);
       formData.Mileage_KM = Number(formData.Mileage_KM);
       formData.Mechanic_Expertise = Number(formData.Mechanic_Expertise);
+
+      const resultDiv = document.getElementById("result");
+      const loadingDiv = document.getElementById("loading");
+
+      resultDiv.classList.remove("show", "error");
+      loadingDiv.classList.add("show");
 
       try {
         const res = await fetch("http://localhost:3000/predict", {
@@ -50,6 +565,8 @@
           body: JSON.stringify(formData)
         });
 
+        loadingDiv.classList.remove("show");
+
         if (!res.ok) {
           throw new Error(`Server responded with status ${res.status}`);
         }
@@ -57,17 +574,24 @@
         const data = await res.json();
 
         if (data.estimated_repair_time !== undefined) {
-          document.getElementById("result").innerText =
-            "Estimated Repair Time: " + data.estimated_repair_time + " hours";
+          resultDiv.classList.remove("error");
+          resultDiv.innerHTML = `
+            ⏱️ Estimated Repair Time<br>
+            <span style="font-size: 1.8em; margin-top: 10px; display: block;">${data.estimated_repair_time} hours</span>
+          `;
+          resultDiv.classList.add("show");
         } else {
-          document.getElementById("result").innerText =
-            "Prediction failed: check your data or server logs.";
+          resultDiv.classList.add("error");
+          resultDiv.textContent = "⚠️ Prediction failed: Check your data or server logs";
+          resultDiv.classList.add("show");
         }
 
       } catch (err) {
         console.error(err);
-        document.getElementById("result").innerText =
-          "Error connecting to server: " + err.message;
+        loadingDiv.classList.remove("show");
+        resultDiv.classList.add("error");
+        resultDiv.textContent = "❌ Error: " + err.message;
+        resultDiv.classList.add("show");
       }
     };
   </script>

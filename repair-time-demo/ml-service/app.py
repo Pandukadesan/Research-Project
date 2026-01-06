@@ -5,7 +5,7 @@ import joblib
 app = Flask(__name__)
 
 # Make sure this is the pipeline, not just the trained RandomForest
-model = joblib.load('repair_time_pipeline.pkl')  
+model = joblib.load('repair_time_pipeline.pkl') 
 
 @app.route('/predict', methods=['POST'])
 def predict():
