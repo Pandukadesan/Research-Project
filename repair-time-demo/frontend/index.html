@@ -267,13 +267,11 @@
 
     #result {
       margin-top: 30px;
-      padding: 25px;
+      padding: 30px;
       background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
       color: white;
       border-radius: 12px;
       text-align: center;
-      font-size: 1.3em;
-      font-weight: 700;
       display: none;
       animation: resultPop 0.5s ease-out;
       box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
@@ -286,6 +284,26 @@
 
     #result.show {
       display: block;
+    }
+
+    .result-title {
+      font-size: 1.1em;
+      opacity: 0.95;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .result-time {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin: 15px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .result-subtitle {
+      font-size: 0.9em;
+      opacity: 0.85;
+      margin-top: 10px;
     }
 
     @keyframes resultPop {
@@ -353,6 +371,10 @@
 
       .radio-option {
         width: 100%;
+      }
+
+      .result-time {
+        font-size: 2em;
       }
     }
 
@@ -559,7 +581,7 @@
       loadingDiv.classList.add("show");
 
       try {
-        const res = await fetch("http://localhost:3000/predict", {
+        const res = await fetch("http://127.0.0.1:5000/predict", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData)
@@ -573,16 +595,20 @@
 
         const data = await res.json();
 
-        if (data.estimated_repair_time !== undefined) {
+        if (data.formatted_time !== undefined) {
           resultDiv.classList.remove("error");
           resultDiv.innerHTML = `
-            ⏱️ Estimated Repair Time<br>
-            <span style="font-size: 1.8em; margin-top: 10px; display: block;">${data.estimated_repair_time} hours</span>
+            <div class="result-title">⏱️ Estimated Repair Time</div>
+            <div class="result-time">${data.formatted_time}</div>
+            <div class="result-subtitle">Calculated using AI prediction model</div>
           `;
           resultDiv.classList.add("show");
         } else {
           resultDiv.classList.add("error");
-          resultDiv.textContent = "⚠️ Prediction failed: Check your data or server logs";
+          resultDiv.innerHTML = `
+            <div style="font-size: 1.3em; font-weight: 700;">⚠️ Prediction Failed</div>
+            <div style="margin-top: 10px; font-size: 1em;">Check your data or server logs</div>
+          `;
           resultDiv.classList.add("show");
         }
 
@@ -590,7 +616,10 @@
         console.error(err);
         loadingDiv.classList.remove("show");
         resultDiv.classList.add("error");
-        resultDiv.textContent = "❌ Error: " + err.message;
+        resultDiv.innerHTML = `
+          <div style="font-size: 1.3em; font-weight: 700;">❌ Connection Error</div>
+          <div style="margin-top: 10px; font-size: 1em;">${err.message}</div>
+        `;
         resultDiv.classList.add("show");
       }
     };
