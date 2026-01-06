@@ -17,8 +17,12 @@ def predict():
 
     # 3️⃣ Predict using the full pipeline
     try:
-        prediction = model.predict(input_df)[0]
-        return jsonify({"estimated_repair_time": float(prediction)})
+        raw_prediction = model.predict(input_df)[0]
+        
+        # ✅ FIX: Round to 2 decimal places here
+        clean_prediction = round(raw_prediction, 2)
+
+        return jsonify({"estimated_repair_time": float(clean_prediction)})
     except Exception as e:
         # Catch errors to debug easily
         return jsonify({"error": str(e)}), 500
