@@ -151,7 +151,7 @@ Predict transparent repair cost ranges instead of a single value using probabili
 
   Outputs
   -Repair Cost value ranges
-  -Vehicle Parts Prices
+   Vehicle Parts Prices
   
 
  
