@@ -200,7 +200,7 @@ Predict transparent repair cost ranges instead of a single value using probabili
 **Developer:** IT22552556 | Deshan P.H.P
 
 #### Problem
-Mileage tampering is common and difficult to verify, affecting 30% of used cars in the EU.
+Mileage tampering and hidden vehicle defects are common and difficult to verify, reducing trust in the used-vehicle market. Studies indicate that a significant portion of used vehicles globally are affected by odometer fraud, leading to financial loss and safety risks for buyers.
 
 #### Solution
 - **Blockchain-based** immutable vehicle history
@@ -211,10 +211,9 @@ Mileage tampering is common and difficult to verify, affecting 30% of used cars 
 - **Blockchain:** Hyperledger (permissioned) / Polygon (public)
 - **AI Fraud Detector:** Tabular + Audio + Visual data processing
 
-1. **Odometer reading validation** - Cross-reference with historical data
-2. **Repair log analysis** - Verify consistency with service records
-3. **Multimodal AI analysis** - Sound + visual inspection data
-4. **Blockchain recording** - Immutable transaction ledger
+1. **Repair log analysis** - Verify consistency with service records
+2. **Multimodal AI analysis** - Sound + visual inspection data
+3. **Blockchain recording** - Immutable transaction ledger
 
 #### Impact
 ✅ Prevents mileage fraud  
