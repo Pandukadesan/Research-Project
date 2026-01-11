@@ -1,0 +1,8 @@
+{
+  "name": "AutoCare AI",
+  "description": "AI-powered garage recommendation and vehicle diagnostic PWA for drivers, garages, and mechanics.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
