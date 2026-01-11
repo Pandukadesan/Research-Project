@@ -141,7 +141,7 @@ Predict transparent repair cost ranges instead of a single value using probabili
 
 #### Models Used
 - **Regression Models** - Randomforest regression,LSTM
-- **TabNet** - Deep Learning for complex tabular data relationships
+- **LSTM-model used for future price prediction
 
 #### Inputs
 - Historical repair invoices
