@@ -26,7 +26,7 @@
 
 This platform addresses major real-world automotive challenges such as:
 
-- ❌ **Unpredictable vehicle breakdowns**
+- **Unpredictable vehicle breakdowns**
 - 💸 **Large variations in repair costs** (up to 40%)
 - 🚫 **Mileage fraud** affecting ~30% of used vehicles
 - ⏳ **Inefficient diagnostics and garage selection**
