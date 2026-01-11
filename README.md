@@ -65,13 +65,13 @@ By integrating **AI-driven diagnostics**, **repair cost & time estimation**, **g
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │              AI & ML Models (ML, DL, NLP)                       │
-│  • Fault Classifier  • Cost Estimator  • Garage Ranker         │
+│  • Fault Classifier  • Cost Estimator  • Repair Time Estimatoer │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │         Repair Estimation & Garage Ranking                      │
-│  • ETA Prediction  • Multi-factor Scoring  • Route Planning    │
+│  • User Friendly conversation  • Multi-factor Scoring           │
 └──────────────────────────┬──────────────────────────────────────┘
                            │
                            ▼
