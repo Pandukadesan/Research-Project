@@ -140,7 +140,7 @@ Record Sounds → Generate Spectrograms → ML Classification → Instant Diagno
 Predict transparent repair cost ranges instead of a single value using probabilistic modeling.
 
 #### Models Used
-- **Regression Models** - Randomforest regression,LSTM
+- **Regression Models** - Randomforest regression 
 - **LSTM-model used for future price prediction
 
 #### Inputs
