@@ -251,8 +251,8 @@ docker >= 20.10 (optional)
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/your-org/vehicle-diagnostics-platform.git
-cd vehicle-diagnostics-platform
+git clone https://github.com/Pandukadesan/Research-Project.git
+cd Research-Project
 ```
 
 ### 2. Backend Setup
