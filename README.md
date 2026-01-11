@@ -149,13 +149,7 @@ Predict transparent repair cost ranges instead of a single value using probabili
 - Labor rates
 - Regional variations
 
-#### Outputs - Probabilistic Cost Ranges
-
-| Percentile | Meaning |
-|------------|---------|
-| **P10** | Minimum expected cost (lower bound) |
-| **P50** | Median / most likely cost |
-| **P90** | Maximum expected cost (upper bound) |
+ 
 
 #### Benefits
 ✅ Helps drivers budget confidently  
