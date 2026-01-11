@@ -18,7 +18,7 @@
 |----------------|----------------|------------------------|------------------------------------|
 | **IT21330278** | Adithya D      | Information Technology | AI Fault-Type Classifier           |
 | **IT22273994** | Wijesinghe S.L | Information Technology | Repair Cost Estimator              |
-| **IT22229434** | Denuwan P.M.K  | Information Technology | Garage Recommendation & ETA System |
+| **IT22229434** | Denuwan P.M.K  | Information Technology | Repair Time Estimatin with Chatbot & Garage Recommendation System |
 | **IT22552556** | Deshan P.H.P   | Information Technology | Mileage Integrity & Fraud Detection|
 
 
