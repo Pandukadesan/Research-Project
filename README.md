@@ -168,12 +168,11 @@ Predict transparent repair cost ranges instead of a single value using probabili
 ### 3️⃣ AI-Based Garage Recommendation & Repair Time Estimation
 **Developer:** IT22229434 | Denuwan P.M.K  
 **Special Focus:** Sri Lanka's first AI-powered garage recommendation system
-
+**Desgined On:**Suzuzki Alto Cars (2010-2025) with 7 fault categories
 #### Features
 - Predict repair ETA using ML
 - Rank garages using weighted scoring
-- NLP chatbot for fault capture & drivability check
-- Real-time routing via Google Maps API
+- Hybrid chatbot for fault capture & drivability check (This chatbot act as Rule Based + Gemini API with knowldege base)
 - Integrated booking and tracking
 
 #### Key Ranking Factors
@@ -186,10 +185,10 @@ Predict transparent repair cost ranges instead of a single value using probabili
 #### Tech Stack
 | Component | Technology |
 |-----------|------------|
-| NLP Chatbot | Rasa |
+| Hybtrid Chatbot | Rule Based + Gemini API with Knowledge Base |
 | ML Models | Scikit-learn (Regression) |
 | Database | MySQL |
-| Maps & Routing | Google Maps API |
+| Maps & Routing | OpenStreet with Leaflet |
 | Mobile App | React Native |
 
 #### Expected Accuracy
