@@ -150,7 +150,7 @@ Predict transparent repair cost ranges instead of a single value using probabili
 - Regional variations
 
   Outputs
-  -Repair Cost value ranges
+  -Repair Cost value ranges,
    Vehicle Parts Prices
   
 
