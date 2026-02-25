@@ -23,7 +23,15 @@ export default function UserDashboard() {
         style={styles.button}
         onPress={() => router.push("/(price predict)")}
       >
-        <Text style={styles.buttonText}>Vehicle Score</Text>
+        <Text style={styles.buttonText}>Price Predict</Text>
+      </TouchableOpacity>
+
+      {/* Price Score Button */}
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/(fault detection)")} 
+      >
+        <Text style={styles.buttonText}>Fault Detection</Text>
       </TouchableOpacity>
     </View>
   );

@@ -66,7 +66,7 @@ export default function VehicleScoreDashboard() {
         type,
       } as any);
 
-      const response = await fetch("http://172.20.10.3:5001/predict", {
+      const response = await fetch("http://172.20.10.3:5001/predict/tyre", {
         method: "POST",
         body: formData,
         headers: {
